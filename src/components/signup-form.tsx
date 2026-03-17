@@ -44,14 +44,7 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
     await authClient.signIn.social({
       provider: "google",
       callbackURL: "/dashboard",
-    },{ onSuccess: () => {
-        alert("Account successfully created");
-        navigate({ to: "/dashboard"});
-      },
-      onError: ({error}) => {
-        setError("root", { message: error.message ? error.message : "Something went wrong please try again" });
-      }
-      })
+    })
   };
 
   const onSubmit = async (data: user) => {

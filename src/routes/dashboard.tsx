@@ -20,12 +20,14 @@ function RouteComponent() {
       await navigate({ to: "/"});
   }
 
-  return (
+  if (session){
+    return (
     <main className='w-full min-h-screen flex items-center justify-center'>
       <div className='w-full justify-center gap-5 flex flex-col'>
-      <header className='w-full text-center'>WELCOME TO YOUR DASHBOARD {session.data?.user.name.split(" ")[0].toLocaleUpperCase()}!</header>
+      <header className='w-full text-center'>WELCOME TO YOUR DASHBOARD {session.data?.user.name.split(" ")[1].toLocaleUpperCase()}!</header>
       <button className='px-4 py-2 w-30 mx-auto bg-black cursor-pointer text-white rounded active:scale-[0.8] duration-100 transition-all' onClick={signOut}>SIGN OUT</button>
       </div>
     </main>
   )
+  }
 }

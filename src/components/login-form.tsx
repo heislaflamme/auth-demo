@@ -42,14 +42,7 @@ export function LoginForm({
       await authClient.signIn.social({
         provider: "google",
         callbackURL: "/dashboard",
-      },{ onSuccess: () => {
-          alert("Account successfully created");
-          navigate({ to: "/dashboard"});
-        },
-        onError: ({error}) => {
-          setError("root", { message: error.message ? error.message : "Something went wrong please try again" });
-        }
-        })
+      })
     };
 
   const onSubmit = async(data: user)=> {
@@ -58,15 +51,14 @@ export function LoginForm({
       email: data.email,
       password: data.password,
       callbackURL: "/dashboard",
-    }, {
-      onSuccess: () => {
-        alert("Account successfully created");
-        navigate({ to: "/dashboard"});
-      },
-      onError: ({error}) => {
-        setError("root", { message: error.message ? error.message : "Something went wrong please try again" });
-      }
-    })
+    },{ onSuccess: () => {
+          alert("Account successfully created");
+          navigate({ to: "/dashboard"});
+        },
+        onError: ({error}) => {
+          setError("root", { message: error.message ? error.message : "Something went wrong please try again" });
+        }
+        })
   }
 
   return (
