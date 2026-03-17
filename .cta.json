@@ -1,0 +1,28 @@
+{
+  "projectName": "auth-demo",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "npm",
+  "includeExamples": false,
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "postgresql"
+    }
+  },
+  "envVarValues": {},
+  "git": false,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "eslint",
+    "nitro",
+    "neon",
+    "drizzle",
+    "shadcn",
+    "t3env",
+    "better-auth",
+    "tanstack-query"
+  ]
+}
