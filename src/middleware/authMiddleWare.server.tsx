@@ -14,3 +14,15 @@ export const authMiddleWare = createMiddleware().server(
         return await next()
     }
 )
+
+export const authLoggedInMiddleWare = createMiddleware().server(
+    async({next, request}) => {
+        const session = await auth.api.getSession({headers: request.headers});
+
+        if (session){
+            throw redirect({ to: "/dashboard"})
+        }
+
+        return await next()
+    }
+)

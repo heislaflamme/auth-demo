@@ -14,11 +14,13 @@ import {
   FieldLabel,
 } from "#/components/ui/field"
 import { Input } from "#/components/ui/input"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import z, { email, string } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { authClient } from "#/lib/auth-client"
+import { toast } from "sonner"
+import { useState } from "react"
 
 const user = z.object({
   email: email().nonempty("Email is not optional"),
@@ -32,11 +34,19 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
 
+    const [show, setShow] = useState(false);
+    const [email, setEmail] = useState("");
+
   const { handleSubmit, register, formState:{ isSubmitting, errors }, setError } = useForm<user>({
     resolver: zodResolver(user)
   })
 
-  const navigate = useNavigate();
+  const resendVerificationEmail = async() => {
+      await authClient.sendVerificationEmail({
+        email: email,
+        callbackURL: "/dashboard",
+      })
+    }
 
   const googleSignin = async() => {
       await authClient.signIn.social({
@@ -52,11 +62,19 @@ export function LoginForm({
       password: data.password,
       callbackURL: "/dashboard",
     },{ onSuccess: () => {
-          alert("Account successfully created");
-          navigate({ to: "/dashboard"});
+          toast.success("Logged in successfully");
         },
         onError: ({error}) => {
           setError("root", { message: error.message ? error.message : "Something went wrong please try again" });
+          toast.error("Login failed");
+          console.log(error.code)
+          if(error.code === "EMAIL_NOT_VERIFIED"){
+            setEmail(data.email);
+            setShow(true);
+          }
+          else{
+            setShow(false);
+          }
         }
         })
   }
@@ -82,27 +100,35 @@ export function LoginForm({
                   placeholder="m@example.com"
                   required
                 />
-                <p className="text-red-600 p-1">{errors.email?.message}</p>
+                {errors.email?.message && <p className="text-red-600 p-1">{errors.email.message}</p>}
               </Field>
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
+                  <Link
+                    to="/forgotPassword"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input {...register("password")} id="password" type="password" required />
-                <p className="text-red-600 p-1">{errors.password?.message}</p>
+                {errors.password?.message && <p className="text-red-600 p-1">{errors.password.message}</p>}
               </Field>
               <Field>
+                
+                {
+                  show &&
+                   <FieldDescription className="px-6 text-center">
+                  <Button variant="link" onClick={resendVerificationEmail} className="p-0 text-black cursor-pointer">Click here to resend verification email.</Button>
+                  </FieldDescription>
+                }
+              
                 <Button type="submit" disabled={isSubmitting} className="bg-black text-white cursor-pointer active:scale-[0.8] transition-all duration-100">{isSubmitting ? "Logging in..." : "Login"}</Button>
                 <Button variant="outline" onClick={googleSignin} type="button" className="bg-black text-white cursor-pointer active:scale-[0.8] transition-all duration-100">
                   Login with Google
                 </Button>
-                <p className="p-1 text-red-600">{errors.root?.message}</p>
+                {errors.root?.message && <p className="text-red-600 p-1">{errors.root.message}</p>}
                 <FieldDescription className="text-center">
                   Don&apos;t have an account? <Link to="/register">Sign up</Link>
                 </FieldDescription>

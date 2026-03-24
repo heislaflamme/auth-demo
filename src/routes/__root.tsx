@@ -13,6 +13,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { Toaster } from 'sonner'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -40,6 +41,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
   shellComponent: RootDocument,
+  notFoundComponent: () => <div className='w-full min-h-screen flex items-center justify-center'><p>Not Found</p></div>,
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
@@ -51,6 +53,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body>
         <TanStackQueryProvider>
           {children}
+          <Toaster closeButton={true} position='top-right'/>
           <TanStackDevtools
             config={{
               position: 'bottom-right',
