@@ -1,86 +1,107 @@
-import { Button } from "#/components/ui/button"
+import { Button } from '#/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "#/components/ui/card"
+} from '#/components/ui/card'
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "#/components/ui/field"
-import { Input } from "#/components/ui/input"
-import { Link } from "@tanstack/react-router"
-import z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { authClient } from "#/lib/auth-client"  
-import { toast } from "sonner"
-import { useState } from "react"
+} from '#/components/ui/field'
+import { Input } from '#/components/ui/input'
+import { Link } from '@tanstack/react-router'
+import z from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { authClient } from '#/lib/auth-client'
+import { toast } from 'sonner'
+import { useState } from 'react'
 
-const user = z.object({
-  firstName: z.string().nonempty("Please enter your first name").min(2, "Minimum of 2 characters"),
-  lastName: z.string().nonempty("Please enter your last name").min(2, "Minimum of 2 characters"),
-  email: z.email().nonempty("Email is required"),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters long"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"]
-})
+const user = z
+  .object({
+    firstName: z
+      .string()
+      .nonempty('Please enter your first name')
+      .min(2, 'Minimum of 2 characters'),
+    lastName: z
+      .string()
+      .nonempty('Please enter your last name')
+      .min(2, 'Minimum of 2 characters'),
+    email: z.email().nonempty('Email is required'),
+    password: z.string().min(8, 'Password must be at least 8 characters long'),
+    confirmPassword: z
+      .string()
+      .min(8, 'Password must be at least 8 characters long'),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
 type user = z.infer<typeof user>
 
 export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
+  const [show, setShow] = useState(false)
+  const [email, setEmail] = useState('')
 
-  const [show, setShow] = useState(false);
-  const [email, setEmail] = useState("");
-
-  const { handleSubmit, register, formState: { errors, isSubmitting }, setError } = useForm<user>({
+  const {
+    handleSubmit,
+    register,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<user>({
     resolver: zodResolver(user),
-  });
+  })
 
-
-  const googleSignin = async() => {
+  const googleSignin = async () => {
     await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/dashboard",
+      provider: 'google',
+      callbackURL: '/dashboard',
     })
-  };
+  }
 
-  const resendVerificationEmail = async() => {
+  const resendVerificationEmail = async () => {
     await authClient.sendVerificationEmail({
       email: email,
-      callbackURL: "/dashboard",
+      callbackURL: '/dashboard',
     })
   }
 
   const onSubmit = async (data: user) => {
-
-    await authClient.signUp.email({
-      email: data.email,
-      password: data.password,
-      name: `${data.firstName} ${data.lastName}`,
-      callbackURL: "/dashboard"
-    }, {
-      onSuccess: () => {
-        toast.success("Account created successfully, please check your email to verify your account");
-        setEmail(data.email);
-        setShow(true);
+    await authClient.signUp.email(
+      {
+        email: data.email,
+        password: data.password,
+        name: `${data.firstName} ${data.lastName}`,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        callbackURL: '/dashboard',
       },
-      onError: ({error}) => {
-        setError("root", { message: error.message ? error.message : "Something went wrong please try again" });
-        toast.error("Sign up failed");
-        setEmail("");
-        setShow(false);
-      }
-    })
-
+      {
+        onSuccess: () => {
+          toast.success(
+            'Account created successfully, please check your email to verify your account',
+          )
+          setEmail(data.email)
+          setShow(true)
+        },
+        onError: ({ error }) => {
+          setError('root', {
+            message: error.message
+              ? error.message
+              : 'Something went wrong please try again',
+          })
+          toast.error('Sign up failed')
+          setEmail('')
+          setShow(false)
+        },
+      },
+    )
   }
-
 
   return (
     <Card {...props} className="w-100">
@@ -95,24 +116,42 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="firstName">First Name</FieldLabel>
-              <Input {...register("firstName")} id="firstName" type="text" placeholder="John" required />
-              {errors.firstName?.message && <p className="text-red-600 p-1">{errors.firstName.message}</p>}
+              <Input
+                {...register('firstName')}
+                id="firstName"
+                type="text"
+                placeholder="John"
+                required
+              />
+              {errors.firstName?.message && (
+                <p className="text-red-600 p-1">{errors.firstName.message}</p>
+              )}
             </Field>
             <Field>
               <FieldLabel htmlFor="lastName">Last Name</FieldLabel>
-              <Input {...register("lastName")} id="lastName" type="text" placeholder="Doe" required />
-              {errors.lastName?.message && <p className="text-red-600 p-1">{errors.lastName.message}</p>}
+              <Input
+                {...register('lastName')}
+                id="lastName"
+                type="text"
+                placeholder="Doe"
+                required
+              />
+              {errors.lastName?.message && (
+                <p className="text-red-600 p-1">{errors.lastName.message}</p>
+              )}
             </Field>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
-                 {...register("email")}
+                {...register('email')}
                 id="email"
                 type="email"
                 placeholder="m@example.com"
                 required
               />
-              {errors.email?.message && <p className="text-red-600 p-1">{errors.email.message}</p>}
+              {errors.email?.message && (
+                <p className="text-red-600 p-1">{errors.email.message}</p>
+              )}
               <FieldDescription>
                 We&apos;ll use this to contact you. We will not share your email
                 with anyone else.
@@ -120,8 +159,15 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
             </Field>
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input {...register("password")} id="password" type="password" required />
-              {errors.password?.message && <p className="text-red-600 p-1">{errors.password.message}</p>}
+              <Input
+                {...register('password')}
+                id="password"
+                type="password"
+                required
+              />
+              {errors.password?.message && (
+                <p className="text-red-600 p-1">{errors.password.message}</p>
+              )}
               <FieldDescription>
                 Must be at least 8 characters long.
               </FieldDescription>
@@ -130,24 +176,49 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
               <FieldLabel htmlFor="confirm-password">
                 Confirm Password
               </FieldLabel>
-              <Input {...register("confirmPassword")} id="confirm-password" type="password" required />
-              {errors.confirmPassword?.message && <p className="text-red-600 p-1">{errors.confirmPassword.message}</p>}
+              <Input
+                {...register('confirmPassword')}
+                id="confirm-password"
+                type="password"
+                required
+              />
+              {errors.confirmPassword?.message && (
+                <p className="text-red-600 p-1">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
               <FieldDescription>Please confirm your password.</FieldDescription>
             </Field>
             <FieldGroup>
-              {show &&
-              <FieldDescription className="px-6 text-center">
-                <Button variant="link" onClick={resendVerificationEmail} className="p-0 text-black cursor-pointer">Click here to resend verification email.</Button>
-              </FieldDescription>
-              }
-              <FieldDescription className="px-6 text-center">
+              {show && (
+                <FieldDescription className="px-6 text-center">
+                  <Button
+                    variant="link"
+                    onClick={resendVerificationEmail}
+                    className="p-0 text-black cursor-pointer"
+                  >
+                    Click here to resend verification email.
+                  </Button>
                 </FieldDescription>
+              )}
+              <FieldDescription className="px-6 text-center"></FieldDescription>
               <Field>
-                <Button type="submit" disabled={isSubmitting} className="bg-black text-white cursor-pointer active:scale-[0.8] transition-all duration-100">
-                  {isSubmitting ? "Creating account..." : "Create Account" }
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-black text-white cursor-pointer active:scale-[0.8] transition-all duration-100"
+                >
+                  {isSubmitting ? 'Creating account...' : 'Create Account'}
                 </Button>
-              {errors.root?.message && <p className="text-red-600 p-1">{errors.root.message}</p>}
-                <Button variant="outline" type="button" onClick={googleSignin} className="bg-black text-white cursor-pointer active:scale-[0.8] transition-all duration-100">
+                {errors.root?.message && (
+                  <p className="text-red-600 p-1">{errors.root.message}</p>
+                )}
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={googleSignin}
+                  className="bg-black text-white cursor-pointer active:scale-[0.8] transition-all duration-100"
+                >
                   Sign up with Google
                 </Button>
                 <FieldDescription className="px-6 text-center">
